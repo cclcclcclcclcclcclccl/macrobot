@@ -71,7 +71,7 @@ def build_report():
     lines.append("⛏️ <b>原物料</b>")
     lines.append(get_ticker("USO",    "🛢️ WTI 油價(USO)"))
     lines.append(get_ticker("UNG",    "🔥 天然氣(UNG)"))
-    lines.append(get_ticker("GLD",    "🥇 黃金(GLD)"))
+    lines.append(get_ticker("GC=F",    "🥇 黃金(GLD)"))
     lines.append(get_ticker("CPER",   "🔩 銅(CPER)"))
     lines.append("")
 
