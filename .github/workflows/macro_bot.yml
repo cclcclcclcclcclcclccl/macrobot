@@ -1,24 +1,26 @@
 name: 總經早報
-
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天 UTC 00:00 = 台灣時間 08:00
-  workflow_dispatch:       # 手動觸發測試用
-
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 jobs:
   send_report:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: 安裝 Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
       - name: 安裝套件
         run: pip install requests python-dotenv yfinance
-
+      - name: 確認環境變數
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          echo "CHAT_ID=${TELEGRAM_CHAT_ID}"
+          echo "TOKEN前10字=${TELEGRAM_TOKEN:0:10}"
       - name: 執行腳本
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
