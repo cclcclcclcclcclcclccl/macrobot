@@ -6,8 +6,8 @@ from datetime import datetime
 
 load_dotenv("telegram.env")
 
-TOKEN = os.getenv("8798741137:AAHJM-8Nrig-xmiNVNk2QylE1Z_GDi2eVGk")
-CHAT_ID = os.getenv("8457497719")
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # ── 重大事件行事曆（自己維護，格式 MM-DD）──────────────────────
 IMPORTANT_EVENTS = {
