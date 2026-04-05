@@ -22,7 +22,7 @@ def send_telegram(message: str):
     else:
         print("✅ 訊息發送成功")
 
-def get_ticker(symbol: str, label: str):
+def get_ticker(symbol: str, label: str, multiplier: float = 1.0):
     try:
         t = yf.Ticker(symbol)
         hist = t.history(period="2d")
@@ -32,7 +32,8 @@ def get_ticker(symbol: str, label: str):
         last_close = hist["Close"].iloc[-1]
         change_pct = (last_close - prev_close) / prev_close * 100
         arrow = "▲" if change_pct >= 0 else "▼"
-        return f"{label}: {last_close:.2f}（{arrow}{abs(change_pct):.2f}%）"
+        display_price = last_close * multiplier
+        return f"{label}: {display_price:.2f}（{arrow}{abs(change_pct):.2f}%）"
     except Exception as e:
         return f"{label}: 錯誤（{e}）"
 
@@ -52,7 +53,7 @@ def build_report():
     lines.append(get_ticker("^GSPC",  "🇺🇸 S&P 500"))
     lines.append(get_ticker("^NDX",   "💻 Nasdaq 100"))
     lines.append(get_ticker("^SOX",   "🔬 費城半導體"))
-    lines.append(get_ticker("vixy",   "😱 VIX 恐慌指數"))
+    lines.append(get_ticker("^VIX",   "😱 VIX 恐慌指數"))
     lines.append("")
 
     # 台股
@@ -71,7 +72,7 @@ def build_report():
     lines.append("⛏️ <b>原物料</b>")
     lines.append(get_ticker("USO",    "🛢️ WTI 油價(USO)"))
     lines.append(get_ticker("UNG",    "🔥 天然氣(UNG)"))
-    lines.append(get_ticker("GC=F",    "🥇 黃金(GLD)"))
+    lines.append(get_ticker("GLD",    "🥇 黃金(≈USD/oz)", multiplier=10))
     lines.append(get_ticker("CPER",   "🔩 銅(CPER)"))
     lines.append("")
 
