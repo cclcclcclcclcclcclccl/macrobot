@@ -22,7 +22,7 @@ def get_economic_calendar():
         )
         resp = requests.get(url, timeout=10)
         if resp.status_code != 200:
-            return ["  ⚠️ 日曆抓取失敗"]
+            return [f"  ⚠️ 日曆抓取失敗：{resp.status_code} {resp.text[:100]}"]
         data = resp.json()
         events = []
         for item in data:
