@@ -52,7 +52,7 @@ def build_report():
     lines.append(get_ticker("^GSPC",  "🇺🇸 S&P 500"))
     lines.append(get_ticker("^NDX",   "💻 Nasdaq 100"))
     lines.append(get_ticker("^SOX",   "🔬 費城半導體"))
-    lines.append(get_ticker("VIXY",   "😱 VIX恐慌ETF(VIXY)"))
+    lines.append(get_ticker("^VIX",   "😱 VIX 恐慌指數"))
     lines.append("")
 
     # 台股
@@ -64,7 +64,7 @@ def build_report():
     # 債券
     lines.append("🏦 <b>債券</b>")
     lines.append(get_ticker("TLT",    "📉 美債ETF(TLT)"))
-    lines.append(get_ticker("^TNX",   "⏱️ 美10年債殖利率"))
+    lines.append(get_ticker("IEF",    "⏱️ 美7-10年債ETF(IEF)"))
     lines.append("")
 
     # 能源 & 原物料
