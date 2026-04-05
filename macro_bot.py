@@ -2,39 +2,12 @@ import os
 import requests
 import yfinance as yf
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime
 
 load_dotenv("telegram.env")
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-TE_API_KEY = os.getenv("TE_API_KEY")
-
-def get_economic_calendar():
-    """自動從 Trading Economics 抓未來7天重大事件"""
-    try:
-        today = datetime.now().strftime("%Y-%m-%d")
-        future = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
-        url = (
-            f"https://api.tradingeconomics.com/calendar/country/"
-            f"united states,taiwan/from/{today}/to/{future}"
-            f"?c={TE_API_KEY}&f=json"
-        )
-        resp = requests.get(url, timeout=10)
-        if resp.status_code != 200:
-            return [f"  ⚠️ 日曆抓取失敗：{resp.status_code} {resp.text[:100]}"]
-        data = resp.json()
-        events = []
-        for item in data:
-            if item.get("Importance", 0) >= 3:
-                date = item.get("Date", "")[:10]
-                name = item.get("Event", "")
-                country = item.get("Country", "")
-                flag = "🇺🇸" if "united states" in country.lower() else "🇹🇼"
-                events.append(f"  📅 {date}：{flag} {name}")
-        return events[:10] if events else ["  （近7日無重大事件）"]
-    except Exception as e:
-        return [f"  ⚠️ 日曆抓取錯誤：{e}"]
 
 def send_telegram(message: str):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -71,7 +44,7 @@ def build_report():
     lines.append("💱 <b>匯率</b>")
     lines.append(get_ticker("TWD=X",    "💵 USD/TWD"))
     lines.append(get_ticker("EURUSD=X", "💶 EUR/USD"))
-    lines.append(get_ticker("DX-Y.NYB", "🦅 美元指數(DXY)"))
+    lines.append(get_ticker("UUP",      "🦅 美元ETF(UUP)"))
     lines.append("")
 
     # 美股指數
@@ -107,12 +80,6 @@ def build_report():
     lines.append(get_ticker("BDRY",   "⚓ 乾散貨ETF(BDRY)"))
     lines.append(get_ticker("ZIM",    "📦 貨櫃航運(ZIM)"))
     lines.append(get_ticker("MATX",   "🚤 貨櫃航運(MATX)"))
-    lines.append("")
-
-    # 重大事件（自動抓取）
-    lines.append("📅 <b>近7日重大事件：</b>")
-    calendar_events = get_economic_calendar()
-    lines.extend(calendar_events)
 
     return "\n".join(lines)
 
