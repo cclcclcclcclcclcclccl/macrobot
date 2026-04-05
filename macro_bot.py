@@ -8,17 +8,33 @@ load_dotenv("telegram.env")
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+TE_API_KEY = os.getenv("TE_API_KEY")
 
-# ── 重大事件行事曆（自己維護，格式 MM-DD）──────────────────────
-IMPORTANT_EVENTS = {
-    "04-07": "🇺🇸 美國 CPI 公布",
-    "04-08": "🏦 Fed Williams 演講",
-    "04-10": "🇹🇼 台灣央行理監事會議",
-    "05-01": "🇺🇸 FOMC 利率決議",
-    "05-14": "🇺🇸 美國 CPI 公布",
-    "05-22": "🇺🇸 美國 GDP 初值",
-    "06-05": "🇺🇸 非農就業報告",
-}
+def get_economic_calendar():
+    """自動從 Trading Economics 抓未來7天重大事件"""
+    try:
+        today = datetime.now().strftime("%Y-%m-%d")
+        future = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+        url = (
+            f"https://api.tradingeconomics.com/calendar/country/"
+            f"united states,taiwan/from/{today}/to/{future}"
+            f"?c={TE_API_KEY}&f=json"
+        )
+        resp = requests.get(url, timeout=10)
+        if resp.status_code != 200:
+            return ["  ⚠️ 日曆抓取失敗"]
+        data = resp.json()
+        events = []
+        for item in data:
+            if item.get("Importance", 0) >= 3:
+                date = item.get("Date", "")[:10]
+                name = item.get("Event", "")
+                country = item.get("Country", "")
+                flag = "🇺🇸" if "united states" in country.lower() else "🇹🇼"
+                events.append(f"  📅 {date}：{flag} {name}")
+        return events[:10] if events else ["  （近7日無重大事件）"]
+    except Exception as e:
+        return [f"  ⚠️ 日曆抓取錯誤：{e}"]
 
 def send_telegram(message: str):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -46,19 +62,6 @@ def get_ticker(symbol: str, label: str):
         return f"{label}: {last_close:.2f}（{arrow}{abs(change_pct):.2f}%）"
     except Exception as e:
         return f"{label}: 錯誤（{e}）"
-
-def check_events_today():
-    today_str = datetime.now().strftime("%m-%d")
-    events = []
-    for date_key, event in IMPORTANT_EVENTS.items():
-        if date_key == today_str:
-            events.append(f"  ⚠️ 今日：{event}")
-    upcoming = []
-    for i in range(1, 8):
-        future = (datetime.now() + timedelta(days=i)).strftime("%m-%d")
-        if future in IMPORTANT_EVENTS:
-            upcoming.append(f"  📅 {future}：{IMPORTANT_EVENTS[future]}")
-    return events, upcoming
 
 def build_report():
     today = datetime.now().strftime("%Y/%m/%d")
@@ -106,15 +109,10 @@ def build_report():
     lines.append(get_ticker("MATX",   "🚤 貨櫃航運(MATX)"))
     lines.append("")
 
-    # 重大事件
-    today_events, upcoming_events = check_events_today()
-    if today_events:
-        lines.append("🔔 <b>今日重大事件：</b>")
-        lines.extend(today_events)
-        lines.append("")
-    if upcoming_events:
-        lines.append("📅 <b>近7日事件：</b>")
-        lines.extend(upcoming_events)
+    # 重大事件（自動抓取）
+    lines.append("📅 <b>近7日重大事件：</b>")
+    calendar_events = get_economic_calendar()
+    lines.extend(calendar_events)
 
     return "\n".join(lines)
 
