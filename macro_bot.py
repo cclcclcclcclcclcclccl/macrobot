@@ -3,6 +3,9 @@ import requests
 import yfinance as yf
 from dotenv import load_dotenv
 from datetime import datetime
+import yfinance as yf
+t = yf.Ticker("WTX&")
+print(t.history(period="2d"))
 
 load_dotenv("telegram.env")
 
