@@ -58,7 +58,7 @@ def build_report():
 
     # 台股
     lines.append("🇹🇼 <b>台股</b>")
-    lines.append(get_ticker("^WTXP&",  "🇹🇼 台指期盤"))
+    lines.append(get_ticker("TW=F", "🇹🇼 台指期"))
     lines.append(get_ticker("TSM",    "🏭 台積電 ADR(TSM)"))
     lines.append("")
 
