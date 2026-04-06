@@ -3,9 +3,7 @@ import requests
 import yfinance as yf
 from dotenv import load_dotenv
 from datetime import datetime
-import yfinance as yf
-t = yf.Ticker("WTX&")
-print(t.history(period="2d"))
+
 
 load_dotenv("telegram.env")
 
@@ -61,7 +59,7 @@ def build_report():
 
     # 台股
     lines.append("🇹🇼 <b>台股</b>")
-    lines.append(get_ticker("WTX&", "🇹🇼 台指期"))
+    lines.append(get_ticker("TWII", "🇹🇼 台指期"))
     lines.append(get_ticker("TSM",    "🏭 台積電 ADR(TSM)"))
     lines.append("")
 
