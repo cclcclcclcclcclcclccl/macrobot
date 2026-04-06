@@ -53,7 +53,7 @@ def build_report():
     lines.append(get_ticker("^GSPC",  "🇺🇸 S&P 500"))
     lines.append(get_ticker("^NDX",   "💻 Nasdaq 100"))
     lines.append(get_ticker("^SOX",   "🔬 費城半導體"))
-    lines.append(get_ticker("VIXY", "😱 VIXY(VIX≈×0.7)"))
+    lines.append(get_ticker("VIXY", "😱 VIXY(>30需注意)"))
     lines.append("")
 
     # 台股
