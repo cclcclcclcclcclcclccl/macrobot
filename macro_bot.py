@@ -53,12 +53,12 @@ def build_report():
     lines.append(get_ticker("^GSPC",  "🇺🇸 S&P 500"))
     lines.append(get_ticker("^NDX",   "💻 Nasdaq 100"))
     lines.append(get_ticker("^SOX",   "🔬 費城半導體"))
-    lines.append(get_ticker("^VIX",   "😱 VIX 恐慌指數"))
+    lines.append(get_ticker("VIX=F",   "😱 VIX 恐慌指數"))
     lines.append("")
 
     # 台股
     lines.append("🇹🇼 <b>台股</b>")
-    lines.append(get_ticker("^TWII",  "🇹🇼 台灣加權"))
+    lines.append(get_ticker("^WTXP&",  "🇹🇼 台指期盤"))
     lines.append(get_ticker("TSM",    "🏭 台積電 ADR(TSM)"))
     lines.append("")
 
