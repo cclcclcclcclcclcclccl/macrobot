@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="市場面板">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>市場面板</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#ffffff; --text:#1f2328; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; }
+  body.dark { --bg:#0f1115; --card:#171a21; --text:#e6e8eb; --muted:#9aa3af; --line:#2a2f3a; --accent:#60a5fa; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:"Microsoft JhengHei","PingFang TC","Noto Sans CJK TC",system-ui,sans-serif; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px;
+           padding:14px 20px; flex-wrap:wrap; }
+  h1 { font-size:20px; margin:0; }
+  .sub { color:var(--muted); font-size:13px; margin-top:2px; }
+  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  #clock { font-variant-numeric:tabular-nums; color:var(--muted); font-size:14px; white-space:nowrap; }
+  button { min-height:38px; background:var(--card); color:var(--text); border:1px solid var(--line);
+           border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; touch-action:manipulation; }
+  button:hover { border-color:var(--accent); color:var(--accent); }
+  main { padding:0 20px 20px; display:grid; gap:16px;
+         grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); }
+  #quotes, #charts, .card, .tradingview-widget-container { min-width:0; width:100%; }
+  .tradingview-widget-container { overflow:hidden; }
+  @media (max-width:900px) { main { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+          padding:6px; overflow:hidden; min-height:120px; }
+  #charts { display:grid; gap:16px; grid-template-columns:1fr 1fr; align-content:start; }
+  @media (max-width:600px) {
+    header { padding:12px 12px 10px; gap:10px; }
+    h1 { font-size:19px; }
+    .sub { font-size:12px; line-height:1.5; }
+    .bar { width:100%; gap:6px; }
+    #clock { flex:1 0 100%; font-size:13px; }
+    .bar button { flex:1 1 calc(50% - 6px); padding:9px 7px; font-size:12px; }
+    main { padding:0 8px 14px; gap:10px; }
+    #charts { grid-template-columns:1fr; gap:10px; }
+    .card { border-radius:8px; padding:3px; }
+    footer { padding:0 12px 20px; font-size:11px; }
+  }
+  body.tw .card iframe { filter: hue-rotate(180deg); }
+  footer { color:var(--muted); font-size:12px; padding:0 20px 24px; line-height:1.7; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>市場面板</h1>
+    <div class="sub">匯率與美債殖利率，一頁看完；報價由 TradingView 元件即時更新</div>
+  </div>
+  <div class="bar">
+    <span id="clock"></span>
+    <button id="twBtn" type="button">紅漲綠跌：開</button>
+    <button id="themeBtn" type="button">切換深色／淺色</button>
+    <button id="reloadBtn" type="button">重新載入元件</button>
+  </div>
+</header>
+
+<main>
+  <div class="card" id="quotes"></div>
+  <div id="charts"></div>
+</main>
+
+<footer>
+  想換商品：編輯下方 script 開頭的 CONFIG（代碼格式如 FX_IDC:USDTWD、TVC:US10Y）。<br>
+  報價多數接近即時，個別商品可能延遲，以元件上的標示為準。漲跌顏色用色相旋轉轉成紅漲綠跌（右上角按鈕可關閉），其他顏色可能略有偏移。<br>
+  需要連網；TradingView 報價與圖表不支援離線更新。可將本頁加入手機主畫面，像 App 一樣開啟。
+</footer>
+
+<script>
+// ===== 可自行修改的設定 =====
+const CONFIG = {
+  quoteGroups: [
+    { name: "匯率", symbols: [
+      { s: "FX_IDC:USDTWD", n: "美元/台幣" },
+      { s: "FX_IDC:USDJPY", n: "美元/日圓" },
+      { s: "FX:EURUSD",     n: "歐元/美元" },
+      { s: "FX_IDC:USDCNH", n: "美元/離岸人民幣" },
+      { s: "CAPITALCOM:DXY", n: "美元指數（測試）" }
+    ]},
+    { name: "美債殖利率", symbols: [
+      { s: "FRED:DGS3MO", n: "美債 3個月（FRED，日更）" },
+      { s: "FRED:DGS2",   n: "美債 2年（FRED，日更）" },
+      { s: "FRED:DGS5",   n: "美債 5年（FRED，日更）" },
+      { s: "FRED:DGS10",  n: "美債 10年（FRED，日更）" },
+      { s: "FRED:DGS30",  n: "美債 30年（FRED，日更）" },
+      { s: "OANDA:USB10YUSD", n: "美10年債價格（OANDA，非殖利率）" }
+    ]},
+    { name: "亞股", symbols: [
+      { s: "OANDA:JP225USD",  n: "日經 225（OANDA）" },
+      { s: "OANDA:HK33HKD",   n: "恆生（OANDA）" },
+      { s: "OANDA:CN50USD",   n: "中國 A50（OANDA）" },
+      { s: "SSE:000001",      n: "上證指數（延遲）" }
+    ]},
+    { name: "美股與風險", symbols: [
+      { s: "FOREXCOM:SPXUSD", n: "S&P 500" },
+      { s: "FOREXCOM:NSXUSD", n: "那斯達克 100" },
+      { s: "FOREXCOM:DJI",    n: "道瓊" },
+      { s: "CAPITALCOM:VIX",  n: "VIX 恐慌指數" }
+    ]},
+    { name: "商品", symbols: [
+      { s: "TVC:GOLD",  n: "黃金" },
+      { s: "TVC:USOIL", n: "原油" },
+      { s: "OANDA:XAUUSD", n: "黃金（OANDA）" },
+      { s: "OANDA:WTICOUSD", n: "原油（OANDA）" }
+    ]}
+  ],
+  miniCharts: ["FX_IDC:USDTWD", "FX_IDC:USDJPY", "FOREXCOM:SPXUSD", "OANDA:JP225USD"]
+};
+// ===== 以下不用改 =====
+
+const BASE = "https://s3.tradingview.com/external-embedding/";
+
+function quotesConfig(theme) {
+  return {
+    width: "100%",
+    height: 620,
+    showSymbolLogo: false,
+    colorTheme: theme,
+    isTransparent: false,
+    locale: "zh_TW",
+    symbolsGroups: CONFIG.quoteGroups.map(function (g) {
+      return {
+        name: g.name,
+        originalName: g.name,
+        symbols: g.symbols.map(function (x) { return { name: x.s, displayName: x.n }; })
+      };
+    })
+  };
+}
+
+function miniConfig(symbol, theme) {
+  return {
+    symbol: symbol,
+    width: "100%",
+    height: 240,
+    locale: "zh_TW",
+    dateRange: "1D",
+    colorTheme: theme,
+    isTransparent: false,
+    autosize: false,
+    largeChartUrl: ""
+  };
+}
+
+function mount(el, file, config) {
+  el.innerHTML = "";
+  var box = document.createElement("div");
+  box.className = "tradingview-widget-container";
+  var inner = document.createElement("div");
+  inner.className = "tradingview-widget-container__widget";
+  var s = document.createElement("script");
+  s.type = "text/javascript";
+  s.async = true;
+  s.src = BASE + file;
+  s.innerHTML = JSON.stringify(config);
+  box.appendChild(inner);
+  box.appendChild(s);
+  el.appendChild(box);
+}
+
+function currentTheme() {
+  return document.body.classList.contains("dark") ? "dark" : "light";
+}
+
+function render() {
+  var theme = currentTheme();
+  mount(document.getElementById("quotes"), "embed-widget-market-quotes.js", quotesConfig(theme));
+  var holder = document.getElementById("charts");
+  holder.innerHTML = "";
+  CONFIG.miniCharts.forEach(function (sym) {
+    var c = document.createElement("div");
+    c.className = "card";
+    holder.appendChild(c);
+    mount(c, "embed-widget-mini-symbol-overview.js", miniConfig(sym, theme));
+  });
+}
+
+function tick() {
+  var now = new Date();
+  var text = now.toLocaleString("zh-TW", {
+    timeZone: "Asia/Taipei", hour12: false,
+    month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit"
+  });
+  document.getElementById("clock").textContent = "台北 " + text;
+}
+
+function init() {
+  try {
+    if (localStorage.getItem("panelTheme") === "dark") document.body.classList.add("dark");
+  } catch (e) {}
+  var tw = true;
+  try { if (localStorage.getItem("panelTw") === "0") tw = false; } catch (e) {}
+  function applyTw() {
+    document.body.classList.toggle("tw", tw);
+    document.getElementById("twBtn").textContent = "紅漲綠跌：" + (tw ? "開" : "關");
+  }
+  applyTw();
+  document.getElementById("twBtn").addEventListener("click", function () {
+    tw = !tw;
+    try { localStorage.setItem("panelTw", tw ? "1" : "0"); } catch (e) {}
+    applyTw();
+  });
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    document.body.classList.toggle("dark");
+    try {
+      localStorage.setItem("panelTheme", currentTheme());
+    } catch (e) {}
+    render();
+  });
+  document.getElementById("reloadBtn").addEventListener("click", render);
+  tick();
+  setInterval(tick, 1000);
+  render();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function (err) {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
