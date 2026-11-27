@@ -47,7 +47,7 @@
     footer { padding:0 12px 20px; font-size:11px; }
     body { padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
   }
-  body.tw .card iframe { filter: hue-rotate(180deg); }
+  body.tw .card:not(.nofilter) iframe { filter: hue-rotate(180deg); }
   footer { color:var(--muted); font-size:12px; padding:0 20px 24px; line-height:1.7; }
   body { padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px)); }
 </style>
@@ -69,9 +69,11 @@
 <main>
   <div class="card" id="quotes"></div>
   <div id="charts"></div>
+  <div class="card nofilter" id="calendar" style="grid-column:1/-1"></div>
 </main>
 
 <footer>
+  最下方是經濟數據日曆（美、台、日、中、歐，只列中高重要性）。<br>
   想換商品：編輯下方 script 開頭的 CONFIG（代碼格式如 FX_IDC:USDTWD、TVC:US10Y）。<br>
   報價多數接近即時，個別商品可能延遲，以元件上的標示為準。漲跌顏色用色相旋轉轉成紅漲綠跌（右上角按鈕可關閉），其他顏色可能略有偏移。<br>
   需要連網；TradingView 報價與圖表不支援離線更新。可將本頁加入手機主畫面，像 App 一樣開啟。
@@ -112,7 +114,8 @@ const CONFIG = {
     ]},
     { name: "商品", symbols: [
       { s: "OANDA:XAUUSD",   n: "黃金現貨" },
-      { s: "OANDA:WTICOUSD", n: "原油 WTI" }
+      { s: "OANDA:WTICOUSD", n: "原油 WTI" },
+      { s: "OANDA:XCUUSD",   n: "銅（景氣指標）" }
     ]}
   ],
   miniCharts: ["FX_IDC:USDTWD", "FX_IDC:USDJPY", "FOREXCOM:SPXUSD", "OANDA:JP225USD"]
@@ -179,8 +182,21 @@ function currentTheme() {
   return document.body.classList.contains("dark") ? "dark" : "light";
 }
 
+function calendarConfig(theme) {
+  return {
+    colorTheme: theme,
+    isTransparent: false,
+    width: "100%",
+    height: 560,
+    locale: "zh_TW",
+    importanceFilter: "0,1",
+    countryFilter: "us,tw,jp,cn,eu"
+  };
+}
+
 function render() {
   var theme = currentTheme();
+  mount(document.getElementById("calendar"), "embed-widget-events.js", calendarConfig(theme));
   mount(document.getElementById("quotes"), "embed-widget-market-quotes.js", quotesConfig(theme));
   var holder = document.getElementById("charts");
   holder.innerHTML = "";
