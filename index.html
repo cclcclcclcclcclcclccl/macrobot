@@ -89,7 +89,8 @@ const CONFIG = {
       { s: "FX:EURUSD",     n: "歐元/美元" },
       { s: "FX_IDC:USDCNH", n: "美元/離岸人民幣" },
       { s: "CAPITALCOM:DXY", n: "美元指數 DXY" },
-      { s: "AMEX:UUP",       n: "美元指數 ETF（UUP，備用）" }
+      { s: "AMEX:UUP",       n: "美元指數 ETF（UUP，備用）" },
+      { s: "FX_IDC:USDKRW", n: "美元/韓元" }
     ]},
     { name: "美債殖利率", symbols: [
       { s: "FRED:DGS3MO", n: "美債 3個月（FRED，日更）" },
@@ -97,21 +98,26 @@ const CONFIG = {
       { s: "FRED:DGS5",   n: "美債 5年（FRED，日更）" },
       { s: "FRED:DGS10",  n: "美債 10年（FRED，日更）" },
       { s: "FRED:DGS30",  n: "美債 30年（FRED，日更）" },
-      { s: "OANDA:USB10YUSD", n: "美10年債價格（OANDA，非殖利率）" }
+      { s: "OANDA:USB10YUSD", n: "美10年債價格（OANDA，非殖利率）" },
+      { s: "NASDAQ:TLT",      n: "長天期美債 ETF（TLT，與殖利率反向）" }
     ]},
     { name: "亞股", symbols: [
       { s: "OANDA:JP225USD",  n: "日經 225（OANDA）" },
       { s: "OANDA:HK33HKD",   n: "香港恆生（OANDA）" },
       { s: "OANDA:CN50USD",   n: "中國 A50（OANDA）" },
       { s: "SSE:000001",      n: "上證指數（延遲）" },
-      { s: "AMEX:EWY",        n: "韓國 ETF（EWY，美元計價）" }
+      { s: "AMEX:EWY",        n: "韓國 ETF（EWY，美元計價）" },
+      { s: "AMEX:EWT",        n: "台灣 ETF（EWT，美元計價）" }
     ]},
     { name: "美股與風險", symbols: [
       { s: "FOREXCOM:SPXUSD", n: "S&P 500" },
       { s: "FOREXCOM:NSXUSD", n: "那斯達克 100" },
       { s: "FOREXCOM:DJI",    n: "道瓊" },
       { s: "CAPITALCOM:VIX",  n: "VIX 恐慌指數" },
-      { s: "BITSTAMP:BTCUSD", n: "比特幣（BTC/USD）" }
+      { s: "BITSTAMP:BTCUSD", n: "比特幣（BTC/USD）" },
+      { s: "NASDAQ:SMH",        n: "半導體 ETF（SMH）" },
+      { s: "NASDAQ:SOXQ",     n: "費半 ETF（SOXQ，追蹤費城半導體）" },
+      { s: "AMEX:HYG",        n: "高收益債 ETF（HYG，信用壓力）" }
     ]},
     { name: "商品", symbols: [
       { s: "OANDA:XAUUSD",   n: "黃金現貨" },
