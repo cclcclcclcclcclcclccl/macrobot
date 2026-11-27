@@ -45,9 +45,11 @@
     #charts { grid-template-columns:1fr; gap:10px; }
     .card { border-radius:8px; padding:3px; }
     footer { padding:0 12px 20px; font-size:11px; }
+    body { padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
   }
   body.tw .card iframe { filter: hue-rotate(180deg); }
   footer { color:var(--muted); font-size:12px; padding:0 20px 24px; line-height:1.7; }
+  body { padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px)); }
 </style>
 </head>
 <body>
@@ -96,9 +98,10 @@ const CONFIG = {
     ]},
     { name: "亞股", symbols: [
       { s: "OANDA:JP225USD",  n: "日經 225（OANDA）" },
-      { s: "OANDA:HK33HKD",   n: "恆生（OANDA）" },
+      { s: "OANDA:HK33HKD",   n: "香港恆生（OANDA）" },
       { s: "OANDA:CN50USD",   n: "中國 A50（OANDA）" },
-      { s: "SSE:000001",      n: "上證指數（延遲）" }
+      { s: "SSE:000001",      n: "上證指數（延遲）" },
+      { s: "AMEX:EWY",        n: "韓國 ETF EWY（測試）" }
     ]},
     { name: "美股與風險", symbols: [
       { s: "FOREXCOM:SPXUSD", n: "S&P 500" },
@@ -107,10 +110,8 @@ const CONFIG = {
       { s: "CAPITALCOM:VIX",  n: "VIX 恐慌指數" }
     ]},
     { name: "商品", symbols: [
-      { s: "TVC:GOLD",  n: "黃金" },
-      { s: "TVC:USOIL", n: "原油" },
-      { s: "OANDA:XAUUSD", n: "黃金（OANDA）" },
-      { s: "OANDA:WTICOUSD", n: "原油（OANDA）" }
+      { s: "OANDA:XAUUSD",   n: "黃金現貨" },
+      { s: "OANDA:WTICOUSD", n: "原油 WTI" }
     ]}
   ],
   miniCharts: ["FX_IDC:USDTWD", "FX_IDC:USDJPY", "FOREXCOM:SPXUSD", "OANDA:JP225USD"]
@@ -119,10 +120,16 @@ const CONFIG = {
 
 const BASE = "https://s3.tradingview.com/external-embedding/";
 
+function quotesHeight() {
+  var rows = 0;
+  CONFIG.quoteGroups.forEach(function (g) { rows += g.symbols.length + 1; });
+  return Math.max(620, 60 + rows * 40);
+}
+
 function quotesConfig(theme) {
   return {
     width: "100%",
-    height: 620,
+    height: quotesHeight(),
     showSymbolLogo: false,
     colorTheme: theme,
     isTransparent: false,
